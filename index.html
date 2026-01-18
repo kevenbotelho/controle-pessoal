@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFP - Controle Financeiro Pessoal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=dark_mode,light_mode" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <header>
+        <button id="hamburger-menu" class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <h1>CFP</h1>
+        <button id="toggle-theme">Modo Escuro</button>
+    </header>
+
+    <nav id="sidebar" class="sidebar">
+        <ul class="nav-list">
+            <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+            <li><a href="#transacoes" class="nav-link" data-section="transacoes">Transações</a></li>
+            <li><a href="#categorias" class="nav-link" data-section="categorias">Categorias</a></li>
+            <li><a href="#lixeira" class="nav-link" data-section="lixeira">Lixeira</a></li>
+            <li><a href="#graficos" class="nav-link" data-section="graficos">Gráficos</a></li>
+            <li><a href="#conta" class="nav-link" data-section="conta">Conta</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="dashboard" class="content-section active">
+            <h2>Dashboard</h2>
+            <div class="dashboard">
+                <div class="card saldo">
+                    <h3>Saldo Atual</h3>
+                    <p id="saldo-atual">R$ 0,00</p>
+                </div>
+                <div class="card entradas">
+                    <h3>Total de Entradas</h3>
+                    <p id="total-entradas">R$ 0,00</p>
+                </div>
+                <div class="card saidas">
+                    <h3>Total de Saídas</h3>
+                    <p id="total-saidas">R$ 0,00</p>
+                </div>
+                <div class="card resumo">
+                    <h3>Resumo do Mês</h3>
+                    <p id="resumo-mes">Entradas: R$ 0,00<br>Saídas: R$ 0,00</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="transacoes" class="content-section">
+            <h2>Transações</h2>
+
+            <!-- Seção explicativa -->
+            <div class="transacoes-intro">
+                <div class="intro-card">
+                    <h3>💡 Como controlar suas finanças</h3>
+                    <p>Registre todas as suas receitas (entradas) e despesas (saídas) para ter uma visão completa do seu dinheiro.</p>
+                    <ul>
+                        <li><strong>Entradas:</strong> Salário, freelas, investimentos, etc.</li>
+                        <li><strong>Saídas:</strong> Alimentação, transporte, moradia, lazer, etc.</li>
+                    </ul>
+                </div>
+
+                <div class="intro-card">
+                    <h3>📊 Dicas importantes</h3>
+                    <ul>
+                        <li>Seja específico nas descrições (ex: "Café da manhã" ao invés de "Comida")</li>
+                        <li>Use categorias para agrupar gastos similares</li>
+                        <li>Registre tudo! Até os pequenos gastos fazem diferença</li>
+                        <li>Revise suas transações mensalmente para identificar padrões</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ações rápidas -->
+            <div class="acoes-rapidas">
+                <button id="btn-adicionar-transacao" class="btn-primary">
+                    ➕ Adicionar Transação
+                </button>
+                <div class="resumo-rapido">
+                    <span id="total-transacoes">0 transações</span>
+                    <span id="periodo-atual">Este mês</span>
+                </div>
+            </div>
+
+            <!-- Filtros avançados -->
+            <div class="filtros-container">
+                <h3>🔍 Filtrar Transações</h3>
+                <div class="filtros">
+                    <div class="filtro-grupo">
+                        <label for="busca">Buscar por descrição:</label>
+                        <input type="text" id="busca" placeholder="Ex: gasolina, salário, mercado...">
+                    </div>
+                    <div class="filtro-grupo">
+                        <label for="filtro-categoria">Categoria:</label>
+                        <select id="filtro-categoria">
+                            <option value="">Todas as Categorias</option>
+                        </select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label for="filtro-tipo">Tipo:</label>
+                        <select id="filtro-tipo">
+                            <option value="">Todos os Tipos</option>
+                            <option value="entrada">Entrada (+)</option>
+                            <option value="saida">Saída (-)</option>
+                        </select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label for="filtro-mes" title="Filtrar transações por mês e ano específicos">Período (mês/ano):</label>
+                        <input type="month" id="filtro-mes" title="Selecione um mês e ano para ver apenas transações desse período">
+                    </div>
+                </div>
+                <div class="filtros-info">
+                    <small><strong></strong>Dica:</strong> Use os filtros para encontrar transações específicas rapidamente. O filtro de <strong>período</strong> permite ver apenas transações de um mês/ano específico.</small>
+                </div>
+            </div>
+
+            <!-- Tabela de transações -->
+            <div class="tabela-container">
+                <div class="tabela-header">
+                    <h3>📋 Suas Transações</h3>
+                    <div class="tabela-stats">
+                        <span id="transacoes-filtradas">Mostrando todas</span>
+                    </div>
+                </div>
+
+                <div class="tabela-responsive">
+                    <table id="tabela-transacoes">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Tipo</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Transações serão inseridas aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="nenhuma-transacao" class="nenhuma-transacao" style="display: none;">
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <h3>Nenhuma transação encontrada</h3>
+                        <p>Comece adicionando sua primeira transação financeira!</p>
+                        <button id="btn-adicionar-primeira" class="btn-primary">Adicionar Primeira Transação</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="categorias" class="content-section">
+            <h2>Categorias</h2>
+            <button id="btn-adicionar-categoria">Adicionar Categoria</button>
+            <ul id="lista-categorias">
+                <!-- Categorias serão inseridas aqui -->
+            </ul>
+        </section>
+
+        <section id="lixeira" class="content-section">
+            <h2>Lixeira</h2>
+            <p class="lixeira-info">Aqui ficam as transações excluídas. Você pode restaurá-las ou excluí-las permanentemente.</p>
+
+            <div class="lixeira-acoes">
+                <span id="total-lixeira">0 itens na lixeira</span>
+            </div>
+
+            <div class="lixeira-container">
+                <table id="tabela-lixeira">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Data de Exclusão</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Transações na lixeira serão inseridas aqui -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="lixeira-vazia" class="empty-state" style="display: none;">
+                <div class="empty-icon">🗑️</div>
+                <h3>Lixeira vazia</h3>
+                <p>Não há transações excluídas no momento.</p>
+            </div>
+        </section>
+
+        <section id="graficos" class="content-section">
+            <h2>Seus Recursos Financeiros</h2>
+
+            <!-- Gráfico principal -->
+            <div class="grafico-container">
+                <canvas id="grafico-gastos"></canvas>
+            </div>
+
+            <!-- Informações separadas do gráfico -->
+            <div class="grafico-info">
+                <div class="info-cards">
+                    <div class="info-card">
+                        <div class="card-icon">💰</div>
+                        <div class="card-content">
+                            <h4>Saldo Atual</h4>
+                            <p id="info-saldo" class="valor-principal">R$ 0,00</p>
+                            <small id="info-saldo-status">Sem dados</small>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="card-icon">📈</div>
+                        <div class="card-content">
+                            <h4>Total de Entradas</h4>
+                            <p id="info-entradas" class="valor-positivo">R$ 0,00</p>
+                            <small>Receitas totais</small>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="card-icon">📉</div>
+                        <div class="card-content">
+                            <h4>Total de Saídas</h4>
+                            <p id="info-saidas" class="valor-negativo">R$ 0,00</p>
+                            <small>Despesas totais</small>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="card-icon">📊</div>
+                        <div class="card-content">
+                            <h4>Percentual Gasto</h4>
+                            <p id="info-percentual" class="valor-percentual">0%</p>
+                            <small id="info-percentual-status">Dos recursos disponíveis</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Análise financeira -->
+                <div class="analise-financeira">
+                    <h3>📈 Análise da Sua Situação Financeira</h3>
+                    <div id="analise-texto" class="analise-texto">
+                        <p>Adicione algumas transações para ver sua análise financeira completa.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conta" class="content-section">
+            <h2>Conta</h2>
+
+            <!-- Perfil do usuário -->
+            <div class="perfil-usuario">
+                <div class="perfil-info-card">
+                    <h3>👤 Perfil do Usuário</h3>
+                    <div class="perfil-conteudo">
+                        <div class="foto-perfil">
+                            <img id="foto-perfil" src="" alt="Foto de perfil" style="display: none;" onerror="this.style.display='none';">
+                            <div id="placeholder-foto" class="placeholder-foto">📷</div>
+                            <input type="file" id="input-foto-perfil" accept="image/*" style="display: none;">
+                            <button id="btn-alterar-foto" class="btn-secondary" title="Alterar foto de perfil">📷 Alterar Foto</button>
+                        </div>
+                        <div class="info-usuario">
+                            <div class="campo-usuario">
+                                <label for="nome-usuario">Nome:</label>
+                                <input type="text" id="nome-usuario" placeholder="Digite seu nome" maxlength="50">
+                                <button id="btn-salvar-nome" class="btn-secondary">💾 Salvar</button>
+                            </div>
+                            <div class="info-conta">
+                                <p><strong>Data de criação:</strong> <span id="data-criacao">Carregando...</span></p>
+                                <p><strong>Status da conta:</strong> <span style="color: var(--success-color);">Ativa ✅</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup Manual -->
+            <div class="backup-manual">
+                <div class="backup-info-card">
+                    <h3>💾 Backup Manual</h3>
+                    <p>Gerencie seus dados financeiros com backup manual. Exporte seus dados para salvar em outro local ou importe dados de backup anterior.</p>
+                    <div class="backup-buttons">
+                        <button id="btn-exportar">📤 Exportar Dados</button>
+                        <input type="file" id="input-importar" accept=".json" style="display: none;">
+                        <button id="btn-importar">📥 Importar Dados</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orçamento mensal -->
+            <div class="orcamento-mensal">
+                <div class="orcamento-card">
+                    <h3>🎯 Orçamento Mensal</h3>
+                    <p>Defina limites para seus gastos mensais e receba alertas automáticos.</p>
+                    <div class="orcamento-config">
+                        <div class="orcamento-total">
+                            <label for="orcamento-total">Orçamento Total Mensal:</label>
+                            <div class="input-group">
+                                <span class="currency">R$</span>
+                                <input type="number" id="orcamento-total" placeholder="0,00" step="0.01" min="0">
+                            </div>
+                        </div>
+                        <div class="orcamento-categorias">
+                            <h4>Orçamento por Categoria:</h4>
+                            <div id="orcamento-categorias-list">
+                                <!-- Categorias serão adicionadas dinamicamente -->
+                            </div>
+                        </div>
+                        <button id="btn-salvar-orcamento" class="btn-secondary">💾 Salvar Orçamento</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações de conta -->
+            <div class="configuracoes-conta">
+                <div class="configuracoes-card">
+                    <h3>⚙️ Configurações da Conta</h3>
+                    <p>Ações irreversíveis que afetam todos os seus dados.</p>
+                    <div class="acoes-perigosas">
+                        <button id="btn-limpar-dados" class="danger">🗑️ Limpar Todos os Dados</button>
+                        <p class="aviso-perigo"><small>⚠️ Esta ação excluirá permanentemente todas as transações, categorias e configurações. Não poderá ser desfeita!</small></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para adicionar/editar transação -->
+    <div id="modal-transacao" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modal-title">Adicionar Transação</h3>
+            <form id="form-transacao">
+                <input type="hidden" id="transacao-id">
+                <label for="data">Data:</label>
+                <input type="date" id="data" required>
+                <label for="descricao">Descrição:</label>
+                <input type="text" id="descricao" required>
+                <label for="categoria">Categoria:</label>
+                <select id="categoria" required>
+                    <!-- Categorias serão inseridas aqui -->
+                </select>
+                <label for="tipo">Tipo:</label>
+                <select id="tipo" required>
+                    <option value="entrada">Entrada</option>
+                    <option value="saida">Saída</option>
+                </select>
+                <label for="valor">Valor:</label>
+                <input type="number" id="valor" step="0.01" min="0" required>
+                <button type="submit">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar/editar categoria -->
+    <div id="modal-categoria" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modal-categoria-title">Adicionar Categoria</h3>
+            <form id="form-categoria">
+                <input type="hidden" id="categoria-id">
+                <label for="nome-categoria">Nome:</label>
+                <input type="text" id="nome-categoria" required>
+                <button type="submit">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/transactions.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
