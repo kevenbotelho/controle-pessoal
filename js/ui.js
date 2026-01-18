@@ -342,18 +342,31 @@ function renderizarGrafico() {
         const percentuais = [];
 
         if (totais.entradas > 0) {
-            dados.push(totais.entradas);
-            labels.push('Disponível');
-            cores.push('#28a745'); // Verde
-            percentuais.push(100);
-        }
+            if (totais.saidas <= totais.entradas) {
+                // Caso normal: verde para disponível, vermelho para gasto
+                const restante = totais.entradas - totais.saidas;
+                dados.push(restante);
+                labels.push('Disponível');
+                cores.push('#28a745'); // Verde
+                percentuais.push(((restante / totais.entradas) * 100).toFixed(1));
 
-        if (totais.saidas > 0) {
+                dados.push(totais.saidas);
+                labels.push('Gasto');
+                cores.push('#dc3545'); // Vermelho
+                percentuais.push(((totais.saidas / totais.entradas) * 100).toFixed(1));
+            } else {
+                // Gastos excedem entradas: gráfico todo vermelho
+                dados.push(totais.saidas);
+                labels.push('Gasto Total');
+                cores.push('#dc3545'); // Vermelho
+                percentuais.push(100);
+            }
+        } else if (totais.saidas > 0) {
+            // Se não há entradas mas há saídas, mostrar tudo vermelho
             dados.push(totais.saidas);
             labels.push('Gasto');
             cores.push('#dc3545'); // Vermelho
-            const percentual = totais.entradas > 0 ? ((totais.saidas / totais.entradas) * 100).toFixed(1) : 0;
-            percentuais.push(percentual);
+            percentuais.push(100);
         }
 
         // Se não há dados
