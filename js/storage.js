@@ -75,6 +75,9 @@ function exportarDadosStorage() {
     const fotoUsuario = localStorage.getItem('usuario_foto') || '';
     const dataCriacao = localStorage.getItem('data_criacao_conta') || '';
 
+    // Incluir orçamentos
+    const orcamentos = localStorage.getItem('orcamentos') || '{}';
+
     const dados = {
         transacoes: transacoes,
         categorias: categorias,
@@ -83,8 +86,9 @@ function exportarDadosStorage() {
             foto: fotoUsuario,
             dataCriacao: dataCriacao
         },
+        orcamentos: orcamentos,
         dataExportacao: new Date().toISOString(),
-        versao: '1.1' // Versão atualizada para incluir perfil
+        versao: '1.2' // Versão atualizada para incluir orçamentos
     };
 
     const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
@@ -130,6 +134,12 @@ function importarDadosStorage(arquivo) {
                         if (dados.perfil.dataCriacao) {
                             localStorage.setItem('data_criacao_conta', dados.perfil.dataCriacao);
                         }
+                    }
+
+                    // Restaurar orçamentos se existirem (versão 1.2+)
+                    if (dados.orcamentos) {
+                        console.log('Restaurando orçamentos');
+                        localStorage.setItem('orcamentos', dados.orcamentos);
                     }
 
                     console.log('Importação concluída com sucesso');
@@ -226,8 +236,9 @@ async function salvarBackupAutomatico() {
         const dados = {
             transacoes: carregarTransacoes(),
             categorias: carregarCategorias(),
+            orcamentos: localStorage.getItem('orcamentos') || '{}',
             dataExportacao: new Date().toISOString(),
-            versao: '1.0'
+            versao: '1.2'
         };
 
         if (pastaBackupHandle) {
@@ -278,6 +289,11 @@ async function carregarUltimoBackup() {
             // Aplicar os dados do backup
             salvarTransacoes(dadosBackup.transacoes);
             salvarCategorias(dadosBackup.categorias);
+
+            // Restaurar orçamentos se existirem
+            if (dadosBackup.orcamentos) {
+                localStorage.setItem('orcamentos', dadosBackup.orcamentos);
+            }
 
             console.log('Último backup carregado automaticamente:', ultimoBackup);
             return true;
@@ -444,6 +460,9 @@ function limparTodosDados() {
     localStorage.removeItem('usuario_nome');
     localStorage.removeItem('usuario_foto');
     localStorage.removeItem('data_criacao_conta');
+
+    // Limpar orçamentos
+    localStorage.removeItem('orcamentos');
 
     // Limpar configurações gerais
     localStorage.removeItem('tema');

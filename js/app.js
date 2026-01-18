@@ -454,6 +454,8 @@ function limparDadosComConfirmacao() {
     if (confirm('ATENÇÃO: Esta ação irá remover TODOS os dados permanentemente. Tem certeza?')) {
         if (confirm('Esta ação não pode ser desfeita. Deseja continuar?')) {
             limparTodosDados();
+            // Também limpar a referência do último backup para evitar recarregamento automático
+            localStorage.removeItem('ultimo_backup');
             mostrarNotificacao('Todos os dados foram removidos!', 'success');
             location.reload(); // Recarregar página
         }
@@ -620,6 +622,9 @@ function salvarOrcamento() {
 
     // Salvar orçamentos
     salvarOrcamentos(orcamentos);
+
+    // Backup automático após salvar orçamentos
+    salvarBackupAutomatico();
 
     // Verificar alertas imediatamente
     verificarAlertasOrcamento();
