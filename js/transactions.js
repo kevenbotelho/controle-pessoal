@@ -150,11 +150,16 @@ function filtrarTransacoes(filtros = {}) {
 function calcularTotais(transacoesFiltradas = transacoes) {
     let totalEntradas = 0;
     let totalSaidas = 0;
+    let totalInvestimentos = 0;
 
     transacoesFiltradas.forEach(transacao => {
         if (transacao.tipo === 'entrada') {
             totalEntradas += transacao.valor;
         } else if (transacao.tipo === 'saida') {
+            totalSaidas += transacao.valor;
+        } else if (transacao.tipo === 'investimento') {
+            totalInvestimentos += transacao.valor;
+            // Investimentos são saídas (aplicações em investimentos)
             totalSaidas += transacao.valor;
         }
     });
@@ -164,8 +169,31 @@ function calcularTotais(transacoesFiltradas = transacoes) {
     return {
         saldo: saldo,
         entradas: totalEntradas,
-        saidas: totalSaidas
+        saidas: totalSaidas,
+        investimentos: totalInvestimentos
     };
+}
+
+// Função para calcular recomendação de poupança
+function calcularRecomendacaoPoupanca() {
+    const totais = calcularTotais();
+    const PORCENTAGEM_RECOMENDADA = 20; // 20% das entradas devem ser poupadas
+
+    if (totais.entradas > 0) {
+        const valorRecomendado = (totais.entradas * PORCENTAGEM_RECOMENDADA) / 100;
+        const valorJaPoupado = totais.investimentos;
+        const valorFaltante = Math.max(0, valorRecomendado - valorJaPoupado);
+
+        return {
+            porcentagem: PORCENTAGEM_RECOMENDADA,
+            valorRecomendado: valorRecomendado,
+            valorJaPoupado: valorJaPoupado,
+            valorFaltante: valorFaltante,
+            metaAlcancada: valorJaPoupado >= valorRecomendado
+        };
+    }
+
+    return null;
 }
 
 // Função para obter resumo do mês atual
@@ -219,8 +247,8 @@ function validarTransacao(transacao) {
         erros.push('Categoria é obrigatória');
     }
 
-    if (!transacao.tipo || !['entrada', 'saida'].includes(transacao.tipo)) {
-        erros.push('Tipo deve ser entrada ou saída');
+    if (!transacao.tipo || !['entrada', 'saida', 'investimento'].includes(transacao.tipo)) {
+        erros.push('Tipo deve ser entrada, saída ou investimento');
     }
 
     if (transacao.valor === undefined || transacao.valor === null || transacao.valor < 0) {

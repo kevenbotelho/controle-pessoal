@@ -47,9 +47,23 @@
                     <h3>Total de Saídas</h3>
                     <p id="total-saidas">R$ 0,00</p>
                 </div>
+                <div class="card investimentos">
+                    <h3>Total de Investimentos</h3>
+                    <p id="total-investimentos">R$ 0,00</p>
+                </div>
                 <div class="card resumo">
                     <h3>Resumo do Mês</h3>
                     <p id="resumo-mes">Entradas: R$ 0,00<br>Saídas: R$ 0,00</p>
+                </div>
+            </div>
+
+            <!-- Mensagem de recomendação de poupança -->
+            <div id="recomendacao-poupanca" class="recomendacao-poupanca" style="display: none;">
+                <div class="poupanca-card">
+                    <h3>💰 Recomendação de Poupança</h3>
+                    <div id="poupanca-conteudo" class="poupanca-conteudo">
+                        <!-- Conteúdo será inserido dinamicamente -->
+                    </div>
                 </div>
             </div>
         </section>
@@ -110,6 +124,7 @@
                             <option value="">Todos os Tipos</option>
                             <option value="entrada">Entrada (+)</option>
                             <option value="saida">Saída (-)</option>
+                            <option value="investimento">Investimento (💰)</option>
                         </select>
                     </div>
                     <div class="filtro-grupo">
@@ -241,6 +256,15 @@
                     </div>
 
                     <div class="info-card">
+                        <div class="card-icon">💰</div>
+                        <div class="card-content">
+                            <h4>Total de Investimentos</h4>
+                            <p id="info-investimentos" class="valor-positivo">R$ 0,00</p>
+                            <small>Poupança aplicada</small>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
                         <div class="card-icon">📊</div>
                         <div class="card-content">
                             <h4>Percentual Gasto</h4>
@@ -359,6 +383,7 @@
                 <select id="tipo" required>
                     <option value="entrada">Entrada</option>
                     <option value="saida">Saída</option>
+                    <option value="investimento">Investimento</option>
                 </select>
                 <label for="valor">Valor:</label>
                 <input type="number" id="valor" step="0.01" min="0" required>

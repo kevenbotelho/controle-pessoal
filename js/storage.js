@@ -78,6 +78,9 @@ function exportarDadosStorage() {
     // Incluir orçamentos
     const orcamentos = localStorage.getItem('orcamentos') || '{}';
 
+    // Incluir configurações da interface
+    const tema = localStorage.getItem('tema') || 'light';
+
     const dados = {
         transacoes: transacoes,
         categorias: categorias,
@@ -87,8 +90,11 @@ function exportarDadosStorage() {
             dataCriacao: dataCriacao
         },
         orcamentos: orcamentos,
+        configuracoes: {
+            tema: tema
+        },
         dataExportacao: new Date().toISOString(),
-        versao: '1.2' // Versão atualizada para incluir orçamentos
+        versao: '1.3' // Versão atualizada para incluir configurações
     };
 
     const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
@@ -140,6 +146,14 @@ function importarDadosStorage(arquivo) {
                     if (dados.orcamentos) {
                         console.log('Restaurando orçamentos');
                         localStorage.setItem('orcamentos', dados.orcamentos);
+                    }
+
+                    // Restaurar configurações se existirem (versão 1.3+)
+                    if (dados.configuracoes) {
+                        console.log('Restaurando configurações');
+                        if (dados.configuracoes.tema) {
+                            localStorage.setItem('tema', dados.configuracoes.tema);
+                        }
                     }
 
                     console.log('Importação concluída com sucesso');
@@ -233,12 +247,28 @@ async function salvarBackupAutomatico() {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const nomeArquivo = `backup_${timestamp}.json`;
 
+        // Incluir dados do perfil do usuário
+        const nomeUsuario = localStorage.getItem('usuario_nome') || '';
+        const fotoUsuario = localStorage.getItem('usuario_foto') || '';
+        const dataCriacao = localStorage.getItem('data_criacao_conta') || '';
+
+        // Incluir configurações da interface
+        const tema = localStorage.getItem('tema') || 'light';
+
         const dados = {
             transacoes: carregarTransacoes(),
             categorias: carregarCategorias(),
+            perfil: {
+                nome: nomeUsuario,
+                foto: fotoUsuario,
+                dataCriacao: dataCriacao
+            },
             orcamentos: localStorage.getItem('orcamentos') || '{}',
+            configuracoes: {
+                tema: tema
+            },
             dataExportacao: new Date().toISOString(),
-            versao: '1.2'
+            versao: '1.3'
         };
 
         if (pastaBackupHandle) {
@@ -290,9 +320,29 @@ async function carregarUltimoBackup() {
             salvarTransacoes(dadosBackup.transacoes);
             salvarCategorias(dadosBackup.categorias);
 
+            // Restaurar dados do perfil se existirem
+            if (dadosBackup.perfil) {
+                if (dadosBackup.perfil.nome) {
+                    localStorage.setItem('usuario_nome', dadosBackup.perfil.nome);
+                }
+                if (dadosBackup.perfil.foto) {
+                    localStorage.setItem('usuario_foto', dadosBackup.perfil.foto);
+                }
+                if (dadosBackup.perfil.dataCriacao) {
+                    localStorage.setItem('data_criacao_conta', dadosBackup.perfil.dataCriacao);
+                }
+            }
+
             // Restaurar orçamentos se existirem
             if (dadosBackup.orcamentos) {
                 localStorage.setItem('orcamentos', dadosBackup.orcamentos);
+            }
+
+            // Restaurar configurações se existirem
+            if (dadosBackup.configuracoes) {
+                if (dadosBackup.configuracoes.tema) {
+                    localStorage.setItem('tema', dadosBackup.configuracoes.tema);
+                }
             }
 
             console.log('Último backup carregado automaticamente:', ultimoBackup);
@@ -454,7 +504,6 @@ function limparTodosDados() {
     localStorage.removeItem(STORAGE_KEYS.TRANSACTIONS);
     localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
     localStorage.removeItem(STORAGE_KEYS.TRASH);
-    localStorage.removeItem('ultimo_backup');
 
     // Limpar dados do perfil do usuário
     localStorage.removeItem('usuario_nome');
@@ -466,4 +515,5 @@ function limparTodosDados() {
 
     // Limpar configurações gerais
     localStorage.removeItem('tema');
+    localStorage.removeItem('ultimo_backup');
 }

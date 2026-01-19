@@ -52,6 +52,7 @@ function aplicarCoresDashboard(totais, percentualGastos, statusFinanceiro) {
     const saldoCard = document.querySelector('.card.saldo');
     const entradasCard = document.querySelector('.card.entradas');
     const saidasCard = document.querySelector('.card.saidas');
+    const investimentosCard = document.querySelector('.card.investimentos');
     const resumoCard = document.querySelector('.card.resumo');
 
     // Saldo Atual - lógica especial
@@ -67,6 +68,9 @@ function aplicarCoresDashboard(totais, percentualGastos, statusFinanceiro) {
 
     // Entradas - sempre verde (receitas são positivas)
     entradasCard.classList.add('excelente');
+
+    // Investimentos - amarelo (investimentos são saídas mas positivas para poupança)
+    investimentosCard.classList.add('bom');
 
     // Saídas - baseado no percentual
     if (percentualGastos <= 25) {
@@ -105,6 +109,7 @@ function atualizarDashboard() {
     document.getElementById('saldo-atual').textContent = formatarMoeda(totais.saldo);
     document.getElementById('total-entradas').textContent = formatarMoeda(totais.entradas);
     document.getElementById('total-saidas').textContent = formatarMoeda(totais.saidas);
+    document.getElementById('total-investimentos').textContent = formatarMoeda(totais.investimentos);
 
     // Resumo do mês com cores
     const percentualMes = resumoMes.entradas > 0 ? (resumoMes.saidas / resumoMes.entradas) * 100 : 0;
@@ -117,6 +122,9 @@ function atualizarDashboard() {
 
     // Aplicar cores dinâmicas
     aplicarCoresDashboard(totais, percentualGastos, statusFinanceiro);
+
+    // Mostrar recomendação de poupança
+    renderizarRecomendacaoPoupanca();
 }
 
 // Função para renderizar tabela de transações
@@ -145,7 +153,7 @@ function renderizarTabelaTransacoes(transacoesParaMostrar = null) {
                 <td>${formatarData(transacao.data)}</td>
                 <td>${transacao.descricao}</td>
                 <td>${categoria ? categoria.nome : 'N/A'}</td>
-                <td>${transacao.tipo === 'entrada' ? 'Entrada (+)' : 'Saída (-)'}</td>
+                <td>${transacao.tipo === 'entrada' ? 'Entrada (+)' : transacao.tipo === 'saida' ? 'Saída (-)' : 'Investimento (💰)'}</td>
                 <td class="${transacao.tipo === 'entrada' ? 'positive' : 'negative'}">
                     ${formatarMoeda(transacao.valor)}
                 </td>
@@ -341,32 +349,52 @@ function renderizarGrafico() {
         const cores = [];
         const percentuais = [];
 
+        // Calcular saídas normais (excluindo investimentos)
+        const saidasNormais = totais.saidas - totais.investimentos;
+
         if (totais.entradas > 0) {
             if (totais.saidas <= totais.entradas) {
-                // Caso normal: verde para disponível, vermelho para gasto
+                // Caso normal: verde para disponível, vermelho para gastos normais, amarelo para investimentos
                 const restante = totais.entradas - totais.saidas;
                 dados.push(restante);
                 labels.push('Disponível');
                 cores.push('#28a745'); // Verde
                 percentuais.push(((restante / totais.entradas) * 100).toFixed(1));
 
-                dados.push(totais.saidas);
-                labels.push('Gasto');
-                cores.push('#dc3545'); // Vermelho
-                percentuais.push(((totais.saidas / totais.entradas) * 100).toFixed(1));
+                if (saidasNormais > 0) {
+                    dados.push(saidasNormais);
+                    labels.push('Gastos');
+                    cores.push('#dc3545'); // Vermelho
+                    percentuais.push(((saidasNormais / totais.entradas) * 100).toFixed(1));
+                }
+
+                if (totais.investimentos > 0) {
+                    dados.push(totais.investimentos);
+                    labels.push('Investimentos');
+                    cores.push('#ffc107'); // Amarelo
+                    percentuais.push(((totais.investimentos / totais.entradas) * 100).toFixed(1));
+                }
             } else {
-                // Gastos excedem entradas: gráfico todo vermelho
+                // Gastos excedem entradas: mostrar déficit
                 dados.push(totais.saidas);
-                labels.push('Gasto Total');
+                labels.push('Déficit');
                 cores.push('#dc3545'); // Vermelho
                 percentuais.push(100);
             }
         } else if (totais.saidas > 0) {
-            // Se não há entradas mas há saídas, mostrar tudo vermelho
-            dados.push(totais.saidas);
-            labels.push('Gasto');
-            cores.push('#dc3545'); // Vermelho
-            percentuais.push(100);
+            // Se não há entradas mas há saídas
+            if (saidasNormais > 0) {
+                dados.push(saidasNormais);
+                labels.push('Gastos');
+                cores.push('#dc3545'); // Vermelho
+                percentuais.push(100);
+            }
+            if (totais.investimentos > 0) {
+                dados.push(totais.investimentos);
+                labels.push('Investimentos');
+                cores.push('#ffc107'); // Amarelo
+                percentuais.push(100);
+            }
         }
 
         // Se não há dados
@@ -498,6 +526,12 @@ function atualizarInformacoesGrafico(totais) {
     const saidasEl = document.getElementById('info-saidas');
     if (saidasEl) {
         saidasEl.textContent = formatarMoeda(totais.saidas);
+    }
+
+    // Investimentos
+    const investimentosEl = document.getElementById('info-investimentos');
+    if (investimentosEl) {
+        investimentosEl.textContent = formatarMoeda(totais.investimentos);
     }
 
     // Percentual gasto
@@ -708,7 +742,7 @@ function atualizarEstatisticasTransacoes(transacoes) {
     }
 
     if (filtroTipo) {
-        filtroTexto += ` | Tipo: ${filtroTipo === 'entrada' ? 'Entradas' : 'Saídas'}`;
+        filtroTexto += ` | Tipo: ${filtroTipo === 'entrada' ? 'Entradas' : filtroTipo === 'saida' ? 'Saídas' : 'Investimentos'}`;
     }
 
     if (busca) {
@@ -775,7 +809,7 @@ function renderizarTabelaLixeira() {
                 <td>${formatarData(item.data)}</td>
                 <td>${item.descricao}</td>
                 <td>${categoria ? categoria.nome : 'N/A'}</td>
-                <td>${item.tipo === 'entrada' ? 'Entrada (+)' : 'Saída (-)'}</td>
+                <td>${item.tipo === 'entrada' ? 'Entrada (+)' : item.tipo === 'saida' ? 'Saída (-)' : 'Investimento (💰)'}</td>
                 <td class="${item.tipo === 'entrada' ? 'positive' : 'negative'}">
                     ${formatarMoeda(item.valor)}
                 </td>
@@ -818,6 +852,47 @@ function removerDaLixeiraPermanentemente(id) {
 }
 
 
+
+// Função para renderizar recomendação de poupança
+function renderizarRecomendacaoPoupanca() {
+    const recomendacaoContainer = document.getElementById('recomendacao-poupanca');
+    const conteudoEl = document.getElementById('poupanca-conteudo');
+
+    if (!recomendacaoContainer || !conteudoEl) return;
+
+    const recomendacao = calcularRecomendacaoPoupanca();
+
+    if (!recomendacao) {
+        recomendacaoContainer.style.display = 'none';
+        return;
+    }
+
+    let mensagem = '';
+
+    if (recomendacao.metaAlcancada) {
+        mensagem = `
+            <div class="poupanca-meta-alcancada">
+                <h4>🎉 Meta de Poupança Atingida!</h4>
+                <p>Parabéns! Você já poupou <strong>${formatarMoeda(recomendacao.valorJaPoupado)}</strong> este mês, atingindo ou superando os <strong>${recomendacao.porcentagem}%</strong> recomendados (<strong>${formatarMoeda(recomendacao.valorRecomendado)}</strong>).</p>
+                <p>Continue assim! O hábito de poupar é fundamental para sua saúde financeira.</p>
+            </div>
+        `;
+    } else {
+        const valorFaltante = recomendacao.valorFaltante;
+        mensagem = `
+            <div class="poupanca-meta-pendente">
+                <h4>💡 Dica Importante de Poupança</h4>
+                <p>Para manter uma saúde financeira sustentável, recomenda-se guardar pelo menos <strong>${recomendacao.porcentagem}%</strong> das suas receitas mensais.</p>
+                <p>Com base nas suas entradas de <strong>${formatarMoeda(recomendacao.valorRecomendado / (recomendacao.porcentagem / 100))}</strong>, você deveria poupar pelo menos <strong>${formatarMoeda(recomendacao.valorRecomendado)}</strong>.</p>
+                <p>Você já poupou <strong>${formatarMoeda(recomendacao.valorJaPoupado)}</strong> este mês. Ainda faltam <strong>${formatarMoeda(valorFaltante)}</strong> para atingir a meta recomendada.</p>
+                <p class="dica-poupanca">💰 Considere registrar transações do tipo "Investimento" para acompanhar seu progresso na poupança!</p>
+            </div>
+        `;
+    }
+
+    conteudoEl.innerHTML = mensagem;
+    recomendacaoContainer.style.display = 'block';
+}
 
 // Função para mostrar seção
 function mostrarSecao(secaoId) {
