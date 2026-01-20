@@ -1078,6 +1078,9 @@ function atualizarInterfaceRelatorio(mes, ano, totais, transacoes) {
     document.getElementById('relatorio-saidas').textContent = formatarMoeda(totais.saidas);
     document.getElementById('relatorio-saidas').className = 'valor negativo';
 
+    document.getElementById('relatorio-investimentos').textContent = formatarMoeda(totais.investimentos);
+    document.getElementById('relatorio-investimentos').className = 'valor valor-amarelo';
+
     document.getElementById('relatorio-saldo').textContent = formatarMoeda(totais.saldo);
     document.getElementById('relatorio-saldo').className = `valor ${totais.saldo >= 0 ? 'positivo' : 'negativo'}`;
 
@@ -1418,6 +1421,10 @@ function exportarRelatorio() {
                         <div class="valor negativo">${formatarMoeda(totais.saidas)}</div>
                     </div>
                     <div class="resumo-item">
+                        <div class="label">Total de Investimentos</div>
+                        <div class="valor positivo">${formatarMoeda(totais.investimentos)}</div>
+                    </div>
+                    <div class="resumo-item">
                         <div class="label">Saldo do Mês</div>
                         <div class="valor ${totais.saldo >= 0 ? 'positivo' : 'negativo'}">${formatarMoeda(totais.saldo)}</div>
                     </div>
@@ -1429,7 +1436,7 @@ function exportarRelatorio() {
             </div>
 
             <div class="acoes-impressao">
-                <button onclick="window.print()" class="btn-imprimir">
+                <button onclick="imprimirRelatorio()" class="btn-imprimir">
                     🖨️ Imprimir Relatório
                 </button>
             </div>
@@ -1440,6 +1447,11 @@ function exportarRelatorio() {
 
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
+                // Função para imprimir relatório
+                function imprimirRelatorio() {
+                    window.print();
+                }
+
                 // Renderizar gráfico na janela de impressão
                 document.addEventListener('DOMContentLoaded', function() {
                     const canvas = document.getElementById('grafico-impressao');

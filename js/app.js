@@ -213,6 +213,25 @@ function configurarEventListeners() {
         btnExportarRelatorio.addEventListener('click', exportarRelatorio);
         console.log('Event listener para btn-exportar-relatorio configurado');
     }
+
+    // Botão "Data de Hoje"
+    const btnDataHoje = document.getElementById('btn-data-hoje');
+    if (btnDataHoje) {
+        btnDataHoje.addEventListener('click', function() {
+            const campoData = document.getElementById('data');
+            if (campoData) {
+                // Obtém a data atual no fuso horário local do usuário
+                // Usando toISOString().split('T')[0] para garantir que pegamos a data local correta
+                const hoje = new Date();
+                const dataLocal = new Date(hoje.getTime() - (hoje.getTimezoneOffset() * 60000));
+                const dataFormatada = dataLocal.toISOString().split('T')[0];
+
+                campoData.value = dataFormatada;
+                mostrarNotificacao('Data definida para hoje!', 'success');
+            }
+        });
+        console.log('Event listener para btn-data-hoje configurado');
+    }
 }
 
 // Função para salvar transação (adicionar ou editar)

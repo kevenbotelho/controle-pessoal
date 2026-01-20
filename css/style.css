@@ -583,6 +583,11 @@ tbody tr:hover {
     font-weight: bold;
 }
 
+.valor-amarelo {
+    color: var(--warning-color) !important;
+    font-weight: bold;
+}
+
 /* Lista de categorias */
 #lista-categorias {
     list-style: none;
@@ -665,6 +670,34 @@ form input, form select, form button {
 form input:focus, form select:focus {
     outline: none;
     border-color: var(--primary-color);
+}
+
+/* Campo de data com botão */
+.campo-data {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.campo-data input[type="date"] {
+    flex: 1;
+}
+
+.btn-data-hoje {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+}
+
+.btn-data-hoje:hover {
+    background-color: #5a6268;
 }
 
 form button {

@@ -329,6 +329,10 @@
                                 <span id="relatorio-saidas" class="valor negativo">R$ 0,00</span>
                             </div>
                             <div class="resumo-item">
+                                <span class="label">Total de Investimentos:</span>
+                                <span id="relatorio-investimentos" class="valor positivo">R$ 0,00</span>
+                            </div>
+                            <div class="resumo-item">
                                 <span class="label">Saldo do Mês:</span>
                                 <span id="relatorio-saldo" class="valor">R$ 0,00</span>
                             </div>
@@ -490,7 +494,10 @@
             <form id="form-transacao">
                 <input type="hidden" id="transacao-id">
                 <label for="data">Data:</label>
-                <input type="date" id="data" required>
+                <div class="campo-data">
+                    <input type="date" id="data" required>
+                    <button type="button" id="btn-data-hoje" class="btn-data-hoje" title="Usar data de hoje">📅 Hoje</button>
+                </div>
                 <label for="descricao">Descrição:</label>
                 <input type="text" id="descricao" required>
                 <label for="categoria">Categoria:</label>

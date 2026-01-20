@@ -110,7 +110,7 @@ function filtrarTransacoes(filtros = {}) {
                     dataTransacao = t.data;
                 } else {
                     // Se for string, tentar parsear
-                    dataTransacao = new Date(t.data + 'T00:00:00'); // Adicionar hora para evitar problemas de timezone
+                    dataTransacao = new Date(t.data); // Usar data diretamente do input type="date"
                 }
 
                 const anoTransacao = dataTransacao.getFullYear();
@@ -272,6 +272,8 @@ function formatarMoeda(valor) {
 
 // Função para formatar data
 function formatarData(dataString) {
-    const data = new Date(dataString);
+    // Para datas no formato YYYY-MM-DD, criar a data diretamente sem problemas de timezone
+    const [ano, mes, dia] = dataString.split('-').map(Number);
+    const data = new Date(ano, mes - 1, dia); // mes - 1 porque JavaScript usa 0-11
     return data.toLocaleDateString('pt-BR');
 }
