@@ -894,6 +894,631 @@ function renderizarRecomendacaoPoupanca() {
     recomendacaoContainer.style.display = 'block';
 }
 
+// Funções para o botão flutuante de ajuda
+function configurarBotaoAjudaFlutuante() {
+    const btnAjuda = document.getElementById('btn-ajuda-flutuante');
+    const modalAjuda = document.getElementById('modal-ajuda');
+
+    if (btnAjuda) {
+        // Abrir modal ao clicar no botão
+        btnAjuda.addEventListener('click', function() {
+            mostrarModal('modal-ajuda');
+        });
+    }
+
+    // Fechar modal ao clicar no X
+    if (modalAjuda) {
+        const closeBtn = modalAjuda.querySelector('.close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                fecharModal('modal-ajuda');
+            });
+        }
+
+        // Fechar modal ao clicar fora
+        modalAjuda.addEventListener('click', function(event) {
+            if (event.target === modalAjuda) {
+                fecharModal('modal-ajuda');
+            }
+        });
+    }
+}
+
+// Funções para o relatório
+function gerarRelatorio() {
+    const mesSelecionado = document.getElementById('relatorio-mes').value;
+
+    if (!mesSelecionado) {
+        mostrarNotificacao('Por favor, selecione um mês e ano para gerar o relatório!', 'error');
+        return;
+    }
+
+    // Extrair ano e mês do formato "YYYY-MM"
+    const [ano, mes] = mesSelecionado.split('-');
+    const mesNumero = parseInt(mes);
+    const anoNumero = parseInt(ano);
+
+    // Obter transações do mês selecionado
+    const transacoesMes = obterTransacoesPorMes(mesNumero, anoNumero);
+
+    if (transacoesMes.length === 0) {
+        mostrarNotificacao('Não há transações para o período selecionado!', 'error');
+        return;
+    }
+
+    // Calcular totais
+    const totais = calcularTotaisMes(transacoesMes);
+
+    // Mostrar resultado primeiro
+    document.getElementById('relatorio-resultado').style.display = 'block';
+    document.getElementById('btn-exportar-relatorio').style.display = 'inline-block';
+
+    // Atualizar interface (incluindo gráfico) após o resultado estar visível
+    setTimeout(() => {
+        atualizarInterfaceRelatorio(mesNumero, anoNumero, totais, transacoesMes);
+
+        // Scroll para o resultado
+        document.getElementById('relatorio-resultado').scrollIntoView({ behavior: 'smooth' });
+
+        mostrarNotificacao('Relatório gerado com sucesso!', 'success');
+    }, 100);
+}
+
+function popularSelecaoMesesRelatorio() {
+    const select = document.getElementById('relatorio-mes');
+    if (!select) return;
+
+    // Obter todos os meses disponíveis
+    const mesesDisponiveis = obterMesesDisponiveis();
+
+    // Limpar opções existentes
+    select.innerHTML = '<option value="">Selecione um mês</option>';
+
+    // Adicionar opções para cada mês disponível
+    mesesDisponiveis.forEach(({ ano, mes, nomeMes, valor }) => {
+        const option = document.createElement('option');
+        option.value = valor; // formato YYYY-MM
+        option.textContent = `${nomeMes} ${ano}`;
+        select.appendChild(option);
+    });
+
+    // Selecionar o mês mais recente por padrão
+    if (mesesDisponiveis.length > 0) {
+        select.value = mesesDisponiveis[0].valor;
+    }
+}
+
+function obterMesesDisponiveis() {
+    const transacoes = obterTransacoes();
+    const mesesUnicos = new Set();
+
+    // Coletar todos os meses únicos
+    transacoes.forEach(transacao => {
+        const data = new Date(transacao.data);
+        const ano = data.getFullYear();
+        const mes = data.getMonth() + 1; // getMonth() retorna 0-11
+        const chave = `${ano}-${mes.toString().padStart(2, '0')}`;
+        mesesUnicos.add(chave);
+    });
+
+    // Converter para array e ordenar (mais recente primeiro)
+    const mesesOrdenados = Array.from(mesesUnicos)
+        .map(chave => {
+            const [ano, mes] = chave.split('-');
+            const data = new Date(parseInt(ano), parseInt(mes) - 1, 1);
+            return {
+                ano: parseInt(ano),
+                mes: parseInt(mes),
+                nomeMes: data.toLocaleDateString('pt-BR', { month: 'long' }),
+                valor: chave
+            };
+        })
+        .sort((a, b) => {
+            // Ordenar por ano descendente, depois por mês descendente
+            if (a.ano !== b.ano) {
+                return b.ano - a.ano;
+            }
+            return b.mes - a.mes;
+        });
+
+    return mesesOrdenados;
+}
+
+function obterTransacoesPorMes(mes, ano) {
+    const transacoes = obterTransacoes();
+
+    return transacoes.filter(transacao => {
+        const dataTransacao = new Date(transacao.data);
+        return dataTransacao.getMonth() === (mes - 1) && dataTransacao.getFullYear() === ano;
+    });
+}
+
+function calcularTotaisMes(transacoes) {
+    let entradas = 0;
+    let saidas = 0;
+    let investimentos = 0;
+
+    transacoes.forEach(transacao => {
+        switch (transacao.tipo) {
+            case 'entrada':
+                entradas += transacao.valor;
+                break;
+            case 'saida':
+                saidas += transacao.valor;
+                break;
+            case 'investimento':
+                investimentos += transacao.valor;
+                saidas += transacao.valor; // Investimentos também contam como saída
+                break;
+        }
+    });
+
+    const saldo = entradas - saidas;
+
+    return {
+        entradas,
+        saidas,
+        investimentos,
+        saldo,
+        totalTransacoes: transacoes.length
+    };
+}
+
+function atualizarInterfaceRelatorio(mes, ano, totais, transacoes) {
+    // Nome do mês
+    const nomeMes = new Date(ano, mes - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+    // Atualizar título
+    document.getElementById('relatorio-titulo').textContent = `Relatório Financeiro - ${nomeMes}`;
+
+    // Atualizar resumo
+    document.getElementById('relatorio-entradas').textContent = formatarMoeda(totais.entradas);
+    document.getElementById('relatorio-entradas').className = 'valor positivo';
+
+    document.getElementById('relatorio-saidas').textContent = formatarMoeda(totais.saidas);
+    document.getElementById('relatorio-saidas').className = 'valor negativo';
+
+    document.getElementById('relatorio-saldo').textContent = formatarMoeda(totais.saldo);
+    document.getElementById('relatorio-saldo').className = `valor ${totais.saldo >= 0 ? 'positivo' : 'negativo'}`;
+
+    document.getElementById('relatorio-total-transacoes').textContent = totais.totalTransacoes;
+
+    // Renderizar gráfico
+    renderizarGraficoRelatorio(totais);
+
+    // Preencher tabela
+    preencherTabelaRelatorio(transacoes);
+}
+
+function renderizarGraficoRelatorio(totais) {
+    const canvas = document.getElementById('grafico-relatorio');
+    if (!canvas) return;
+
+    // Destruir gráfico anterior se existir
+    if (window.graficoRelatorio) {
+        window.graficoRelatorio.destroy();
+    }
+
+    // Dados do gráfico
+    const dados = [];
+    const labels = [];
+    const cores = [];
+
+    // Calcular valores proporcionais
+    if (totais.entradas > 0) {
+        const restante = totais.entradas - totais.saidas;
+        if (restante > 0) {
+            dados.push(restante);
+            labels.push('Disponível');
+            cores.push('#28a745'); // Verde
+        }
+
+        if (totais.saidas > totais.investimentos) {
+            dados.push(totais.saidas - totais.investimentos);
+            labels.push('Gastos');
+            cores.push('#dc3545'); // Vermelho
+        }
+
+        if (totais.investimentos > 0) {
+            dados.push(totais.investimentos);
+            labels.push('Investimentos');
+            cores.push('#ffc107'); // Amarelo
+        }
+    }
+
+    // Criar gráfico
+    const ctx = canvas.getContext('2d');
+    window.graficoRelatorio = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: dados,
+                backgroundColor: cores,
+                borderColor: '#fff',
+                borderWidth: 3,
+                hoverBorderWidth: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: { size: 14 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${formatarMoeda(value)} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function preencherTabelaRelatorio(transacoes) {
+    const tbody = document.getElementById('relatorio-transacoes-body');
+    tbody.innerHTML = '';
+
+    // Ordenar transações por data
+    transacoes.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+    transacoes.forEach(transacao => {
+        const categoria = obterCategoriaPorId(transacao.categoria);
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${formatarData(transacao.data)}</td>
+            <td>${transacao.descricao}</td>
+            <td>${categoria ? categoria.nome : 'N/A'}</td>
+            <td>${transacao.tipo === 'entrada' ? 'Entrada (+)' : transacao.tipo === 'saida' ? 'Saída (-)' : 'Investimento (💰)'}</td>
+            <td class="${transacao.tipo === 'entrada' ? 'positive' : 'negative'}">${formatarMoeda(transacao.valor)}</td>
+        `;
+
+        tbody.appendChild(row);
+    });
+}
+
+function exportarRelatorio() {
+    const mesSelecionado = document.getElementById('relatorio-mes').value;
+
+    if (!mesSelecionado) {
+        mostrarNotificacao('Selecione um mês para exportar!', 'error');
+        return;
+    }
+
+    // Obter dados do relatório atual
+    const [ano, mes] = mesSelecionado.split('-');
+    const mesNumero = parseInt(mes);
+    const anoNumero = parseInt(ano);
+    const transacoesMes = obterTransacoesPorMes(mesNumero, anoNumero);
+    const totais = calcularTotaisMes(transacoesMes);
+    const nomeMes = new Date(anoNumero, mesNumero - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+    // Criar conteúdo HTML para impressão
+    const conteudoImpressao = `
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>CFP - Relatório Financeiro</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 20px;
+                    line-height: 1.6;
+                    color: #333;
+                }
+
+                .titulo-principal {
+                    text-align: center;
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin-bottom: 30px;
+                    border-bottom: 2px solid #007bff;
+                    padding-bottom: 10px;
+                }
+
+                .secao {
+                    margin-bottom: 40px;
+                    page-break-inside: avoid;
+                }
+
+                .secao h2 {
+                    color: #007bff;
+                    font-size: 18px;
+                    margin-bottom: 15px;
+                    border-bottom: 1px solid #ddd;
+                    padding-bottom: 5px;
+                }
+
+                .tabela-relatorio {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 15px;
+                    font-size: 12px;
+                }
+
+                .tabela-relatorio th,
+                .tabela-relatorio td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                    vertical-align: top;
+                }
+
+                .tabela-relatorio th {
+                    background-color: #f8f9fa;
+                    font-weight: bold;
+                    color: #333;
+                }
+
+                .tabela-relatorio tbody tr:nth-child(even) {
+                    background-color: #f8f9fa;
+                }
+
+                .valor-positivo {
+                    color: #28a745;
+                    font-weight: bold;
+                }
+
+                .valor-negativo {
+                    color: #dc3545;
+                    font-weight: bold;
+                }
+
+                .grafico-container {
+                    text-align: center;
+                    margin: 30px 0;
+                    page-break-inside: avoid;
+                }
+
+                .grafico-container img {
+                    max-width: 100%;
+                    height: auto;
+                }
+
+                .resumo-financeiro {
+                    background-color: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 8px;
+                    padding: 20px;
+                    margin-top: 20px;
+                }
+
+                .resumo-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
+                    margin-top: 15px;
+                }
+
+                .resumo-item {
+                    text-align: center;
+                    padding: 10px;
+                    background: white;
+                    border-radius: 5px;
+                    border: 1px solid #dee2e6;
+                }
+
+                .resumo-item .label {
+                    font-weight: bold;
+                    color: #666;
+                    font-size: 12px;
+                    margin-bottom: 5px;
+                }
+
+                .resumo-item .valor {
+                    font-size: 16px;
+                    font-weight: bold;
+                }
+
+                .resumo-item .valor.positivo {
+                    color: #28a745;
+                }
+
+                .resumo-item .valor.negativo {
+                    color: #dc3545;
+                }
+
+                .data-geracao {
+                    text-align: center;
+                    margin-top: 40px;
+                    font-size: 10px;
+                    color: #666;
+                    border-top: 1px solid #ddd;
+                    padding-top: 10px;
+                }
+
+                @media print {
+                    body {
+                        margin: 0;
+                        padding: 15mm;
+                    }
+
+                    .secao {
+                        page-break-inside: avoid;
+                    }
+
+                    .tabela-relatorio {
+                        font-size: 10px;
+                    }
+
+                    .tabela-relatorio th,
+                    .tabela-relatorio td {
+                        padding: 4px;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="titulo-principal">
+                CFP - Relatório Financeiro ${nomeMes}
+            </div>
+
+            <div class="secao">
+                <h2>📋 Detalhes das Transações</h2>
+                <table class="tabela-relatorio">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${transacoesMes.sort((a, b) => new Date(a.data) - new Date(b.data)).map(transacao => {
+                            const categoria = obterCategoriaPorId(transacao.categoria);
+                            return `
+                                <tr>
+                                    <td>${formatarData(transacao.data)}</td>
+                                    <td>${transacao.descricao}</td>
+                                    <td>${categoria ? categoria.nome : 'N/A'}</td>
+                                    <td>${transacao.tipo === 'entrada' ? 'Entrada (+)' : transacao.tipo === 'saida' ? 'Saída (-)' : 'Investimento (💰)'}</td>
+                                    <td class="${transacao.tipo === 'entrada' ? 'valor-positivo' : 'valor-negativo'}">${formatarMoeda(transacao.valor)}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="secao">
+                <h2>📊 Gráfico de Movimentações Financeiras</h2>
+                <div class="grafico-container">
+                    <canvas id="grafico-impressao" width="400" height="300"></canvas>
+                </div>
+            </div>
+
+            <div class="resumo-financeiro">
+                <h2>💰 Resumo Financeiro - ${nomeMes}</h2>
+                <div class="resumo-grid">
+                    <div class="resumo-item">
+                        <div class="label">Total de Entradas</div>
+                        <div class="valor positivo">${formatarMoeda(totais.entradas)}</div>
+                    </div>
+                    <div class="resumo-item">
+                        <div class="label">Total de Saídas</div>
+                        <div class="valor negativo">${formatarMoeda(totais.saidas)}</div>
+                    </div>
+                    <div class="resumo-item">
+                        <div class="label">Saldo do Mês</div>
+                        <div class="valor ${totais.saldo >= 0 ? 'positivo' : 'negativo'}">${formatarMoeda(totais.saldo)}</div>
+                    </div>
+                    <div class="resumo-item">
+                        <div class="label">Total de Transações</div>
+                        <div class="valor">${totais.totalTransacoes}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acoes-impressao">
+                <button onclick="window.print()" class="btn-imprimir">
+                    🖨️ Imprimir Relatório
+                </button>
+            </div>
+
+            <div class="data-geracao">
+                Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                // Renderizar gráfico na janela de impressão
+                document.addEventListener('DOMContentLoaded', function() {
+                    const canvas = document.getElementById('grafico-impressao');
+                    if (!canvas) return;
+
+                    const dados = [];
+                    const labels = [];
+                    const cores = [];
+
+                    // Calcular valores proporcionais
+                    const totais = ${JSON.stringify(totais)};
+
+                    if (totais.entradas > 0) {
+                        const restante = totais.entradas - totais.saidas;
+                        if (restante > 0) {
+                            dados.push(restante);
+                            labels.push('Disponível');
+                            cores.push('#28a745');
+                        }
+
+                        if (totais.saidas > totais.investimentos) {
+                            dados.push(totais.saidas - totais.investimentos);
+                            labels.push('Gastos');
+                            cores.push('#dc3545');
+                        }
+
+                        if (totais.investimentos > 0) {
+                            dados.push(totais.investimentos);
+                            labels.push('Investimentos');
+                            cores.push('#ffc107');
+                        }
+                    }
+
+                    const ctx = canvas.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: dados,
+                                backgroundColor: cores,
+                                borderColor: '#fff',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: false,
+                            maintainAspectRatio: false,
+                            cutout: '70%',
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 10,
+                                        font: { size: 12 }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+            </script>
+        </body>
+        </html>
+    `;
+
+    // Abrir nova janela para visualização e impressão
+    const janelaImpressao = window.open('', '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
+
+    if (janelaImpressao) {
+        janelaImpressao.document.write(conteudoImpressao);
+        janelaImpressao.document.close();
+
+        mostrarNotificacao('Relatório aberto em nova aba! Clique em "Imprimir Relatório" para imprimir.', 'success');
+    } else {
+        mostrarNotificacao('Erro ao abrir janela do relatório. Verifique se o bloqueador de pop-ups está desabilitado.', 'error');
+    }
+}
+
 // Função para mostrar seção
 function mostrarSecao(secaoId) {
     // Fechar todos os modais abertos antes de mudar de seção
@@ -917,6 +1542,16 @@ function mostrarSecao(secaoId) {
 
     // Adicionar classe active ao link correspondente
     document.querySelector(`[data-section="${secaoId}"]`).classList.add('active');
+
+    // Controlar visibilidade do botão de ajuda
+    const btnAjuda = document.getElementById('btn-ajuda-flutuante');
+    if (btnAjuda) {
+        if (secaoId === 'transacoes') {
+            btnAjuda.classList.add('visible');
+        } else {
+            btnAjuda.classList.remove('visible');
+        }
+    }
 
     // Fechar sidebar automaticamente apenas em dispositivos móveis
     if (window.innerWidth <= 768) {
@@ -948,5 +1583,10 @@ function mostrarSecao(secaoId) {
     if (secaoId === 'conta') {
         carregarPerfilUsuario();
         renderizarOrcamentos();
+    }
+
+    // Popular seleção de meses quando mostrar a seção de relatório
+    if (secaoId === 'relatorio') {
+        popularSelecaoMesesRelatorio();
     }
 }

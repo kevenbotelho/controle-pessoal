@@ -27,6 +27,7 @@
             <li><a href="#categorias" class="nav-link" data-section="categorias">Categorias</a></li>
             <li><a href="#lixeira" class="nav-link" data-section="lixeira">Lixeira</a></li>
             <li><a href="#graficos" class="nav-link" data-section="graficos">Gráficos</a></li>
+            <li><a href="#relatorio" class="nav-link" data-section="relatorio">Relatório</a></li>
             <li><a href="#conta" class="nav-link" data-section="conta">Conta</a></li>
         </ul>
     </nav>
@@ -71,8 +72,8 @@
         <section id="transacoes" class="content-section">
             <h2>Transações</h2>
 
-            <!-- Seção explicativa -->
-            <div class="transacoes-intro">
+            <!-- Seção explicativa (oculta) -->
+            <div class="transacoes-intro hidden">
                 <div class="intro-card">
                     <h3>💡 Como controlar suas finanças</h3>
                     <p>Registre todas as suas receitas (entradas) e despesas (saídas) para ter uma visão completa do seu dinheiro.</p>
@@ -284,6 +285,90 @@
             </div>
         </section>
 
+        <section id="relatorio" class="content-section">
+            <h2>📊 Relatório Financeiro</h2>
+
+            <div class="relatorio-container">
+                <div class="relatorio-controls">
+                    <div class="relatorio-selector">
+                        <h3>📅 Selecione o Período</h3>
+                        <div class="mes-selector">
+                            <label for="relatorio-mes">Mês/Ano do Relatório:</label>
+                            <select id="relatorio-mes">
+                                <option value="">Carregando meses...</option>
+                            </select>
+                        </div>
+                        <button id="btn-gerar-relatorio" class="btn-primary">📋 Gerar Relatório</button>
+                        <button id="btn-exportar-relatorio" class="btn-secondary" style="display: none;">📤 Exportar Relatório</button>
+                    </div>
+
+                    <div class="relatorio-info">
+                        <div class="info-card">
+                            <h4>💡 Sobre o Relatório</h4>
+                            <p>Selecione um mês e ano para gerar um relatório completo contendo:</p>
+                            <ul>
+                                <li>📊 Todas as transações do período</li>
+                                <li>📈 Gráfico visual das movimentações</li>
+                                <li>📋 Tabela formatada para impressão</li>
+                                <li>💰 Resumo financeiro do mês</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="relatorio-resultado" class="relatorio-resultado" style="display: none;">
+                    <div class="relatorio-header">
+                        <h3 id="relatorio-titulo">Relatório Financeiro - Janeiro 2024</h3>
+                        <div class="relatorio-resumo">
+                            <div class="resumo-item">
+                                <span class="label">Total de Entradas:</span>
+                                <span id="relatorio-entradas" class="valor positivo">R$ 0,00</span>
+                            </div>
+                            <div class="resumo-item">
+                                <span class="label">Total de Saídas:</span>
+                                <span id="relatorio-saidas" class="valor negativo">R$ 0,00</span>
+                            </div>
+                            <div class="resumo-item">
+                                <span class="label">Saldo do Mês:</span>
+                                <span id="relatorio-saldo" class="valor">R$ 0,00</span>
+                            </div>
+                            <div class="resumo-item">
+                                <span class="label">Total de Transações:</span>
+                                <span id="relatorio-total-transacoes" class="valor">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico do relatório -->
+                    <div class="relatorio-grafico">
+                        <h4>📊 Movimentações Financeiras</h4>
+                        <canvas id="grafico-relatorio"></canvas>
+                    </div>
+
+                    <!-- Tabela do relatório -->
+                    <div class="relatorio-tabela">
+                        <h4>📋 Detalhes das Transações</h4>
+                        <div class="tabela-responsive">
+                            <table id="tabela-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Descrição</th>
+                                        <th>Categoria</th>
+                                        <th>Tipo</th>
+                                        <th>Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="relatorio-transacoes-body">
+                                    <!-- Transações serão inseridas aqui -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="conta" class="content-section">
             <h2>Conta</h2>
 
@@ -363,6 +448,39 @@
             </div>
         </section>
     </main>
+
+    <!-- Botão flutuante de ajuda -->
+    <button id="btn-ajuda-flutuante" class="btn-ajuda-flutuante" title="Dicas para controlar suas finanças">
+        <span class="material-symbols-outlined">help</span>
+    </button>
+
+    <!-- Modal para dicas -->
+    <div id="modal-ajuda" class="modal">
+        <div class="modal-content modal-ajuda-content">
+            <span class="close">&times;</span>
+            <h3>💡 Dicas para Controlar Suas Finanças</h3>
+            <div class="modal-ajuda-body">
+                <div class="intro-card">
+                    <h3>💡 Como controlar suas finanças</h3>
+                    <p>Registre todas as suas receitas (entradas) e despesas (saídas) para ter uma visão completa do seu dinheiro.</p>
+                    <ul>
+                        <li><strong>Entradas:</strong> Salário, freelas, investimentos, etc.</li>
+                        <li><strong>Saídas:</strong> Alimentação, transporte, moradia, lazer, etc.</li>
+                    </ul>
+                </div>
+
+                <div class="intro-card">
+                    <h3>📊 Dicas importantes</h3>
+                    <ul>
+                        <li>Seja específico nas descrições (ex: "Café da manhã" ao invés de "Comida")</li>
+                        <li>Use categorias para agrupar gastos similares</li>
+                        <li>Registre tudo! Até os pequenos gastos fazem diferença</li>
+                        <li>Revise suas transações mensalmente para identificar padrões</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal para adicionar/editar transação -->
     <div id="modal-transacao" class="modal">

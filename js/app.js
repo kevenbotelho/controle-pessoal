@@ -23,6 +23,10 @@ async function inicializarAplicacao() {
     renderizarListaCategorias();
     renderizarGrafico();
     configurarEventListeners();
+    configurarBotaoAjudaFlutuante();
+
+    // Mostrar seção padrão (dashboard) e configurar botão de ajuda
+    mostrarSecao('dashboard');
 }
 
 // Função para configurar event listeners
@@ -195,6 +199,19 @@ function configurarEventListeners() {
     if (btnSalvarOrcamento) {
         btnSalvarOrcamento.addEventListener('click', salvarOrcamento);
         console.log('Event listener para btn-salvar-orcamento configurado');
+    }
+
+    // Relatório
+    const btnGerarRelatorio = document.getElementById('btn-gerar-relatorio');
+    if (btnGerarRelatorio) {
+        btnGerarRelatorio.addEventListener('click', gerarRelatorio);
+        console.log('Event listener para btn-gerar-relatorio configurado');
+    }
+
+    const btnExportarRelatorio = document.getElementById('btn-exportar-relatorio');
+    if (btnExportarRelatorio) {
+        btnExportarRelatorio.addEventListener('click', exportarRelatorio);
+        console.log('Event listener para btn-exportar-relatorio configurado');
     }
 }
 

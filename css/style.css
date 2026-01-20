@@ -327,10 +327,56 @@ main {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-    padding: 1rem;
-    background-color: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.acoes-rapidas::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.acoes-rapidas:hover::before {
+    left: 100%;
+}
+
+.acoes-rapidas .btn-primary {
+    background-color: white;
+    color: var(--primary-color);
+    border: 2px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.acoes-rapidas .btn-primary:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.acoes-rapidas .resumo-rapido {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.acoes-rapidas .resumo-rapido span {
+    color: white;
+}
+
+.acoes-rapidas #total-transacoes {
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary {
@@ -1550,4 +1596,343 @@ form button {
 
 .fade-in {
     animation: fadeIn 0.5s;
+}
+
+/* Seção de Relatório */
+.relatorio-container {
+    margin-bottom: 2rem;
+}
+
+.relatorio-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.relatorio-selector {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.relatorio-selector h3 {
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.mes-selector {
+    margin-bottom: 1.5rem;
+}
+
+.mes-selector label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.mes-selector input[type="month"],
+.mes-selector select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.mes-selector select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.relatorio-selector button {
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.relatorio-info .info-card {
+    height: fit-content;
+}
+
+.relatorio-info .info-card h4 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.relatorio-info .info-card ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.relatorio-info .info-card li {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.relatorio-resultado {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.5s;
+}
+
+.relatorio-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 2rem;
+}
+
+.relatorio-header h3 {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+}
+
+.relatorio-resumo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.resumo-item {
+    background: rgba(0, 123, 255, 0.05);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.resumo-item .label {
+    display: block;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.resumo-item .valor {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.resumo-item .valor.positivo {
+    color: var(--success-color);
+}
+
+.resumo-item .valor.negativo {
+    color: var(--danger-color);
+}
+
+.relatorio-grafico, .relatorio-tabela {
+    margin-bottom: 3rem;
+}
+
+.relatorio-grafico h4, .relatorio-tabela h4 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.relatorio-grafico canvas {
+    max-width: 100%;
+    height: 300px !important;
+    margin: 0 auto;
+    display: block;
+}
+
+.relatorio-tabela table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.relatorio-tabela th {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.relatorio-tabela td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.relatorio-tabela tbody tr:nth-child(even) {
+    background-color: rgba(0, 123, 255, 0.02);
+}
+
+.relatorio-tabela tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Responsividade para relatório */
+@media (max-width: 768px) {
+    .relatorio-controls {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .relatorio-selector {
+        padding: 1.5rem;
+    }
+
+    .relatorio-resumo {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .relatorio-header h3 {
+        font-size: 1.5rem;
+    }
+
+    .relatorio-resultado {
+        padding: 1rem;
+    }
+
+    .relatorio-tabela {
+        overflow-x: auto;
+    }
+
+    .relatorio-tabela table {
+        min-width: 600px;
+    }
+}
+
+/* Botão flutuante de ajuda */
+.btn-ajuda-flutuante {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-ajuda-flutuante.visible {
+    display: flex;
+}
+
+.btn-ajuda-flutuante:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(0, 123, 255, 0.4);
+}
+
+.btn-ajuda-flutuante:active {
+    transform: scale(0.95);
+}
+
+.btn-ajuda-flutuante .material-symbols-outlined {
+    font-size: 28px;
+    line-height: 1;
+}
+
+/* Classe para esconder elementos */
+.hidden {
+    display: none !important;
+}
+
+/* Modal de ajuda */
+.modal-ajuda-content {
+    max-width: 700px;
+    width: 90%;
+}
+
+.modal-ajuda-content h3 {
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.modal-ajuda-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Responsividade para o botão flutuante */
+@media (max-width: 768px) {
+    .btn-ajuda-flutuante {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .btn-ajuda-flutuante .material-symbols-outlined {
+        font-size: 24px;
+    }
+
+.modal-ajuda-body {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-height: 50vh;
+}
+
+/* Botão de Imprimir no Relatório */
+.acoes-impressao {
+    text-align: center;
+    margin-top: 40px;
+    page-break-inside: avoid;
+}
+
+.btn-imprimir {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-imprimir:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn-imprimir:active {
+    transform: translateY(1px);
+}
+
+@media print {
+    .acoes-impressao {
+        display: none;
+    }
+}
 }
