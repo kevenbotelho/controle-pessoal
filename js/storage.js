@@ -513,6 +513,10 @@ function limparTodosDados() {
     // Limpar orçamentos
     localStorage.removeItem('orcamentos');
 
+    // Limpar caixinhas
+    localStorage.removeItem('cfp_caixinhas');
+    localStorage.removeItem('cfp_caixinhas_backup');
+
     // Limpar configurações gerais
     localStorage.removeItem('tema');
     localStorage.removeItem('ultimo_backup');

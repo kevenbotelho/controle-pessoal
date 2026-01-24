@@ -29,6 +29,7 @@
             <li><a href="#graficos" class="nav-link" data-section="graficos">Gráficos</a></li>
             <li><a href="#relatorio" class="nav-link" data-section="relatorio">Relatório</a></li>
             <li><a href="#conta" class="nav-link" data-section="conta">Conta</a></li>
+            <li><a href="#caixinhas" class="nav-link" data-section="caixinhas">Caixinhas</a></li>
         </ul>
     </nav>
 
@@ -451,6 +452,58 @@
                 </div>
             </div>
         </section>
+
+        <!-- Seção de Caixinhas -->
+        <section id="caixinhas" class="content-section">
+            <h2>💰 Caixinhas de Poupança</h2>
+
+            <div class="caixinhas-header">
+                <div class="header-info">
+                    <p>Crie e gerencie suas metas de poupança</p>
+                </div>
+                <div class="header-acoes">
+                    <button id="btn-criar-caixinha" class="btn-primary">
+                        ➕ Criar Caixinha
+                    </button>
+                    <div class="backup-acoes">
+                        <button id="btn-exportar-caixinhas" class="btn-secondary" title="Exportar caixinhas">
+                            📤 Exportar
+                        </button>
+                        <input type="file" id="input-importar-caixinhas" accept=".json" style="display: none;">
+                        <button id="btn-importar-caixinhas" class="btn-secondary" title="Importar caixinhas">
+                            📥 Importar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="caixinhas-intro">
+                <div class="intro-card">
+                    <h3>💡 Como funcionam as caixinhas</h3>
+                    <p>As caixinhas ajudam você a planejar e acompanhar suas metas de poupança.</p>
+                    <ul>
+                        <li><strong>Defina sua meta:</strong> Valor alvo e prazo</li>
+                        <li><strong>Calcule automaticamente:</strong> Quanto guardar por período</li>
+                        <li><strong>Acompanhe o progresso:</strong> Veja quanto já guardou</li>
+                        <li><strong>Contribuições flexíveis:</strong> Adicione valores manualmente</li>
+                    </ul>
+                </div>
+
+                <div class="intro-card">
+                    <h3>📊 Dicas para suas caixinhas</h3>
+                    <ul>
+                        <li>Comece com metas pequenas e realistas</li>
+                        <li>Use a calculadora para encontrar valores compatíveis com sua renda</li>
+                        <li>Revise suas caixinhas mensalmente</li>
+                        <li>Celebre quando atingir suas metas!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="lista-caixinhas" class="caixinhas-container">
+                <!-- Lista de caixinhas será renderizada aqui -->
+            </div>
+        </section>
     </main>
 
     <!-- Botão flutuante de ajuda -->
@@ -531,9 +584,169 @@
         </div>
     </div>
 
+    <!-- Modal para criar/editar caixinha -->
+    <div id="modal-caixinha" class="modal">
+        <div class="modal-content modal-caixinha-content">
+            <span class="close">&times;</span>
+            <h3 id="modal-caixinha-title">Criar Nova Caixinha</h3>
+            <form id="form-caixinha">
+                <input type="hidden" id="caixinha-id">
+
+                <label for="nome-caixinha">Nome da Caixinha:</label>
+                <input type="text" id="nome-caixinha" placeholder="Ex: Viagem para a praia, Novo notebook, Emergência" required>
+
+                <label for="valor-alvo">Valor Alvo (R$):</label>
+                <input type="number" id="valor-alvo" step="0.01" min="0" placeholder="Ex: 1200.00" required>
+
+                <label for="prazo-tipo">Tipo de Prazo:</label>
+                <select id="prazo-tipo" required>
+                    <option value="meses">Número de meses</option>
+                    <option value="dataFinal">Data final específica</option>
+                </select>
+
+                <div id="prazo-meses-container">
+                    <label for="prazo-meses">Número de Meses:</label>
+                    <input type="number" id="prazo-meses" min="1" value="6" required>
+                </div>
+
+                <div id="prazo-data-final-container" style="display: none;">
+                    <label for="prazo-data-final">Data Final:</label>
+                    <input type="date" id="prazo-data-final">
+                </div>
+
+                <label for="data-inicio">Data de Início:</label>
+                <div class="campo-data">
+                    <input type="date" id="data-inicio" required>
+                    <button type="button" id="btn-data-hoje-caixinha" class="btn-data-hoje" title="Usar data de hoje">📅 Hoje</button>
+                </div>
+
+                <label for="frequencia">Frequência de Contribuição:</label>
+                <select id="frequencia" required>
+                    <option value="mensal">Mensal</option>
+                    <option value="semanal">Semanal</option>
+                    <option value="diaria">Diária</option>
+                </select>
+
+                <label for="categoria-caixinha">Categoria (opcional):</label>
+                <select id="categoria-caixinha">
+                    <option value="">Selecione uma categoria</option>
+                    <!-- Categorias serão preenchidas dinamicamente -->
+                </select>
+
+                <label for="nota-caixinha">Nota/Descrição (opcional):</label>
+                <textarea id="nota-caixinha" placeholder="Ex: Poupança para viagem de fim de ano, Fundo de emergência, etc." rows="3"></textarea>
+
+                <button type="button" id="btn-calcular-sugestao" class="btn-secondary">
+                    🧮 Calcular Sugestão de Contribuição
+                </button>
+
+                <div id="resultado-calculo-sugestao" style="display: none;">
+                    <!-- Resultado da sugestão será exibido aqui -->
+                </div>
+
+                <button type="submit" class="btn-primary">Salvar Caixinha</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar contribuição -->
+    <div id="modal-contribuicao" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modal-contribuicao-title">Adicionar Contribuição</h3>
+
+            <div id="caixinha-info-contribuicao" class="caixinha-info-modal">
+                <!-- Informações da caixinha serão exibidas aqui -->
+            </div>
+
+            <form id="form-contribuicao">
+                <input type="hidden" id="contribuicao-caixinha-id">
+
+                <label for="valor-contribuicao">Valor da Contribuição (R$):</label>
+                <input type="number" id="valor-contribuicao" step="0.01" min="0.01" placeholder="Ex: 200.00" required>
+
+                <label for="data-contribuicao">Data da Contribuição:</label>
+                <div class="campo-data">
+                    <input type="date" id="data-contribuicao" required>
+                    <button type="button" id="btn-data-hoje-contribuicao" class="btn-data-hoje" title="Usar data de hoje">📅 Hoje</button>
+                </div>
+
+                <button type="submit" class="btn-primary">Adicionar Contribuição</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para detalhes da caixinha -->
+    <div id="modal-detalhes-caixinha" class="modal">
+        <div class="modal-content modal-detalhes-caixinha-content">
+            <span class="close">&times;</span>
+            <h3>📊 Detalhes da Caixinha</h3>
+
+            <div class="detalhes-header">
+                <h4 id="detalhes-caixinha-nome">Nome da Caixinha</h4>
+                <span id="detalhes-caixinha-status" class="caixinha-status-badge">ATIVA</span>
+            </div>
+
+            <div class="detalhes-progresso">
+                <h4>Progresso</h4>
+                <div class="progresso-bar">
+                    <div id="detalhes-caixinha-progresso-bar" class="progresso-fill" style="width: 0%"></div>
+                </div>
+                <span id="detalhes-caixinha-progresso" class="progresso-texto">0%</span>
+            </div>
+
+            <div class="detalhes-info-grid">
+                <div class="info-card">
+                    <h5>💰 Valor Guardado</h5>
+                    <p id="detalhes-caixinha-valor-guardado">R$ 0,00</p>
+                </div>
+                <div class="info-card">
+                    <h5>🎯 Meta</h5>
+                    <p id="detalhes-caixinha-valor-alvo">R$ 0,00</p>
+                </div>
+                <div class="info-card">
+                    <h5>📅 Conclusão Estimada</h5>
+                    <p id="detalhes-caixinha-data-conclusao">--/--/----</p>
+                </div>
+                <div class="info-card">
+                    <h5>💸 Contribuição</h5>
+                    <p id="detalhes-caixinha-contribuicao">R$ 0,00 / período</p>
+                </div>
+                <div class="info-card">
+                    <h5>📊 % da Renda</h5>
+                    <p id="detalhes-caixinha-percentual">0%</p>
+                </div>
+                <div class="info-card">
+                    <h5>📅 Frequência</h5>
+                    <p id="detalhes-caixinha-frequencia">Mensal</p>
+                </div>
+            </div>
+
+            <div class="detalhes-secao">
+                <h4>📋 Histórico de Contribuições</h4>
+                <div id="detalhes-caixinha-historico" class="historico-contribuicoes">
+                    <!-- Histórico será preenchido aqui -->
+                </div>
+            </div>
+
+            <div class="detalhes-secao">
+                <h4>ℹ️ Informações Adicionais</h4>
+                <div class="info-adicionais">
+                    <p><strong>Categoria:</strong> <span id="detalhes-caixinha-categoria">Nenhuma</span></p>
+                    <p><strong>Nota:</strong> <span id="detalhes-caixinha-nota">Nenhuma nota</span></p>
+                    <p><strong>Data de Criação:</strong> <span id="detalhes-caixinha-data-criacao">--/--/----</span></p>
+                </div>
+            </div>
+
+            <button class="btn-secondary fechar-detalhes" onclick="fecharModal('modal-detalhes-caixinha')">Fechar</button>
+        </div>
+    </div>
+
     <script src="js/storage.js"></script>
     <script src="js/transactions.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/caixinha.js"></script>
+    <script src="js/caixinha-ui.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

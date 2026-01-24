@@ -56,6 +56,28 @@ Um aplicativo web completo para controle financeiro pessoal que funciona 100% of
 - Gráfico circular mostrando saldo vs gastos (verde = dinheiro disponível, vermelho = gastos)
 - Interface organizada por seções
 
+### ✅ Caixinhas de Poupança 💰 (NOVO!)
+- **Sistema completo de metas de poupança**
+- Criar caixinhas com: nome, valor alvo, prazo (meses ou data final), frequência de contribuição
+- Cálculo automático de valor por período e percentual da renda
+- Acompanhamento de progresso com barra visual
+- Contribuições manuais e histórico completo
+- Status: Ativa/Pausada/Concluída
+- Exportação e importação de caixinhas em JSON
+- Integração com categorias existentes
+- Notificações quando metas são atingidas
+- Sugestões inteligentes baseadas na renda mensal
+- Interface intuitiva com cards coloridos por status
+
+### 📊 Funcionalidades das Caixinhas
+- **Calculadora inteligente**: Calcula automaticamente quanto guardar por período
+- **Acompanhamento visual**: Barra de progresso e cards informativos
+- **Flexibilidade**: Contribuições manuais a qualquer momento
+- **Gerenciamento completo**: Pausar, retomar, editar e excluir caixinhas
+- **Backup integrado**: Caixinhas são salvas no LocalStorage e no sistema de backup
+- **Relatórios**: Histórico detalhado de todas as contribuições
+- **Notificações**: Alertas quando metas são atingidas ou quando percentuais são altos
+
 ## Tecnologias Utilizadas
 
 - **HTML5**: Estrutura semântica

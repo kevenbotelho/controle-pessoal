@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Caixinhas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/transactions.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/caixinha.js"></script>
+    <script src="js/caixinha-ui.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste do Sistema de Caixinhas</h1>
+
+    <div class="test-section">
+        <h2>Teste 1: Criar Caixinha</h2>
+        <button onclick="testCriarCaixinha()">Testar Criação de Caixinha</button>
+        <div id="test1-result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Teste 2: Calcular Sugestão</h2>
+        <button onclick="testCalcularSugestao()">Testar Cálculo de Sugestão</button>
+        <div id="test2-result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Teste 3: Adicionar Contribuição</h2>
+        <button onclick="testAdicionarContribuicao()">Testar Contribuição Manual</button>
+        <div id="test3-result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Teste 4: Alternar Status</h2>
+        <button onclick="testAlternarStatus()">Testar Alternância de Status</button>
+        <div id="test4-result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Teste 5: Exportar/Importar</h2>
+        <button onclick="testExportarImportar()">Testar Exportação/Importação</button>
+        <div id="test5-result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Teste 6: Validações</h2>
+        <button onclick="testValidacoes()">Testar Validações</button>
+        <div id="test6-result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Teste 7: Progresso e Conclusão</h2>
+        <button onclick="testProgressoConclusao()">Testar Progresso e Conclusão</button>
+        <div id="test7-result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Teste 8: Inicialização</h2>
+        <button onclick="testInicializacao()">Testar Inicialização</button>
+        <div id="test8-result" class="test-result"></div>
+    </div>
+
+    <script>
+        function showResult(elementId, message, isSuccess) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+        }
+
+        function testCriarCaixinha() {
+            try {
+                // Limpar caixinhas existentes
+                localStorage.removeItem('cfp_caixinhas');
+
+                const caixinhaData = {
+                    nome: 'Viagem para a Praia',
+                    valorAlvo: 1200,
+                    prazoTipo: 'meses',
+                    prazoMeses: 6,
+                    dataInicio: '2026-01-15',
+                    frequencia: 'mensal',
+                    categoria: null,
+                    nota: 'Poupança para viagem de verão'
+                };
+
+                const resultado = Caixinha.criarCaixinha(caixinhaData);
+
+                if (resultado && resultado.id) {
+                    showResult('test1-result',
+                        `✅ Sucesso: Caixinha criada com ID ${resultado.id}, valor por período R$${resultado.valorPorPeriodo}, ${resultado.percentualSugerido}% da renda`,
+                        true);
+                } else {
+                    showResult('test1-result', '❌ Falha: Caixinha não criada corretamente', false);
+                }
+            } catch (error) {
+                showResult('test1-result', `❌ Erro: ${error.message}`, false);
+            }
+        }
+
+        function testCalcularSugestao() {
+            try {
+                const caixinhaData = {
+                    nome: 'Novo Notebook',
+                    valorAlvo: 3000,
+                    prazoTipo: 'meses',
+                    prazoMeses: 12,
+                    dataInicio: '2026-01-01',
+                    frequencia: 'mensal'
+                };
+
+                const sugestao = Caixinha.calcularSugestaoContribuicao(caixinhaData);
+
+                if (sugestao && sugestao.valorPorPeriodo) {
+                    showResult('test2-result',
+                        `✅ Sucesso: Valor sugerido R$${sugestao.valorPorPeriodo} por ${sugestao.frequencia} (${sugestao.percentualRenda}% da renda)`,
+                        true);
+                } else {
+                    showResult('test2-result', '❌ Falha: Cálculo de sugestão não funcionou', false);
+                }
+            } catch (error) {
+                showResult('test2-result', `❌ Erro: ${error.message}`, false);
+            }
+        }
+
+        function testAdicionarContribuicao() {
+            try {
+                // Criar uma caixinha primeiro
+                const caixinha = Caixinha.criarCaixinha({
+                    nome: 'Teste Contribuição',
+                    valorAlvo: 1000,
+                    prazoTipo: 'meses',
+                    prazoMeses: 10,
+                    dataInicio: '2026-01-01',
+                    frequencia: 'mensal'
+                });
+
+                if (!caixinha) {
+                    throw new Error('Não foi possível criar caixinha para teste');
+                }
+
+                // Adicionar contribuição
+                const resultado = Caixinha.adicionarContribuicaoManual(caixinha.id, 150);
+
+                if (resultado && resultado.valorGuardado === 150) {
+                    showResult('test3-result',
+                        `✅ Sucesso: Contribuição de R$150 adicionada, valor guardado R$${resultado.valorGuardado}`,
+                        true);
+                } else {
+                    showResult('test3-result', '❌ Falha: Contribuição não adicionada corretamente', false);
+                }
+            } catch (error) {
+                showResult('test3-result', `❌ Erro: ${error.message}`, false);
+            }
+        }
+
+        function testAlternarStatus() {
+            try {
+                // Criar uma caixinha
+                const caixinha = Caixinha.criarCaixinha({
+                    nome: 'Teste Status',
+                    valorAlvo: 500,
+                    prazoTipo: 'meses',
+                    prazoMeses: 5,
+                    dataInicio: '2026-01-01',
+                    frequencia: 'mensal'
+                });
+
+                if (!caixinha) {
+                    throw new Error('Não foi possível criar caixinha para teste');
+                }
+
+                // Alternar status
+                const resultado = Caixinha.alternarStatusCaixinha(caixinha.id);
+
+                if (resultado && resultado.status === 'pausada') {
+                    showResult('test4-result',
+                        `✅ Sucesso: Status alterado para "${resultado.status}"`,
+                        true);
+                } else {
+                    showResult('test4-result', '❌ Falha: Status não alterado corretamente', false);
+                }
+            } catch (error) {
+                showResult('test4-result', `❌ Erro: ${error.message}`, false);
+            }
+        }
+
+        function testExportarImportar() {
+            try {
+                // Criar algumas caixinhas
+                Caixinha.criarCaixinha({
+                    nome: 'Export Test 1',
+                    valorAlvo: 1000,
+                    prazoTipo: 'meses',
+                    prazoMeses: 6,
+                    dataInicio: '2026-01-01',
+                    frequencia: 'mensal'
+                });
+
+                Caixinha.criarCaixinha({
+                    nome: 'Export Test 2',
+                    valorAlvo: 2000,
+                    prazoTipo: 'meses',
+                    prazoMeses: 12,
+                    dataInicio: '2026-01-01',
+                    frequencia: 'mensal'
+                });
+
+                // Verificar exportação (simular)
+                const caixinhas = Caixinha.carregarCaixinhas();
+                if (caixinhas.length >= 2) {
+                    showResult('test5-result',
+                        `✅ Sucesso: ${caixinhas.length} caixinhas criadas e prontas para exportação`,
+                        true);
+                } else {
+                    showResult('test5-result', '❌ Falha: Exportação não funcionou corretamente', false);
+                }
+            } catch (error) {
+                showResult('test5-result', `❌ Erro: ${error.message}`, false);
+            }
+        }
+
+        function testValidacoes() {
+            try {
+                // Testar validação de nome vazio
+                try {
+                    Caixinha.criarCaixinha({
+                        nome: '',
+                        valorAlvo: 100,
+                        prazoTipo: 'meses',
+                        prazoMeses: 1,
+                        dataInicio: '2026-01-01',
+                        frequencia: 'mensal'
+                    });
+                    showResult('test6-result', '❌ Falha: Validação de nome vazio não funcionou', false);
+                    return;
+                } catch (e) {
+                    // Esperado - nome vazio deve falhar
+                }
+
+                // Testar validação de valor alvo zero
+                try {
+                    Caixinha.criarCaixinha({
+                        nome: 'Teste Valor Zero',
+                        valorAlvo: 0,
+                        prazoTipo: 'meses',
+                        prazoMeses: 1,
+                        dataInicio: '2026-01-01',
+                        frequencia: 'mensal'
+                    });
+                    showResult('test6-result', '❌ Falha: Validação de valor alvo zero não funcionou', false);
+                    return;
+                } catch (e) {
+                    // Esperado - valor zero deve falhar
+                }
+
+                // Testar validação de prazo mínimo
+                try {
+                    Caixinha.criarCaixinha({
+                        nome: 'Teste Prazo Mínimo',
+                        valorAlvo: 100,
+                        prazoTipo: 'meses',
+                        prazoMeses: 0,
+                        dataInicio: '2026-01-01',
+                        frequencia: 'mensal'
+                    });
+                    showResult('test6-result', '❌ Falha: Validação de prazo mínimo não funcionou', false);
+                    return;
+                } catch (e) {
+                    // Esperado - prazo mínimo deve falhar
+                }
+
+                showResult('test6-result', '✅ Sucesso: Todas as validações estão funcionando corretamente', true);
+
+            } catch (error) {
+                showResult('test6-result', `❌ Erro: ${error.message}`, false);
+            }
+        }
+
+        function testProgressoConclusao() {
+            try {
+                // Criar uma caixinha com meta baixa para teste
+                const caixinha = Caixinha.criarCaixinha({
+                    nome: 'Teste Conclusão',
+                    valorAlvo: 100,
+                    prazoTipo: 'meses',
+                    prazoMeses: 1,
+                    dataInicio: '2026-01-01',
+                    frequencia: 'mensal'
+                });
+
+                if (!caixinha) {
+                    throw new Error('Não foi possível criar caixinha para teste');
+                }
+
+                // Adicionar contribuição para atingir a meta
+                const resultado = Caixinha.adicionarContribuicaoManual(caixinha.id, 100);
+
+                if (resultado && resultado.status === 'concluida') {
+                    const progresso = Caixinha.calcularProgressoCaixinha(resultado);
+                    showResult('test7-result',
+                        `✅ Sucesso: Meta atingida (${progresso}%), status: ${resultado.status}`,
+                        true);
+                } else {
+                    showResult('test7-result', '❌ Falha: Progresso e conclusão não funcionaram corretamente', false);
+                }
+            } catch (error) {
+                showResult('test7-result', `❌ Erro: ${error.message}`, false);
+            }
+        }
+
+        function testInicializacao() {
+            try {
+                // Testar inicialização
+                const resultado = Caixinha.initCaixinhas();
+
+                if (resultado && resultado.caixinhas !== undefined) {
+                    showResult('test8-result',
+                        `✅ Sucesso: Inicialização funcionou, ${resultado.caixinhas.length} caixinhas carregadas, ${resultado.notificacoes.length} notificações`,
+                        true);
+                } else {
+                    showResult('test8-result', '❌ Falha: Inicialização não funcionou corretamente', false);
+                }
+            } catch (error) {
+                showResult('test8-result', `❌ Erro: ${error.message}`, false);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -25,6 +25,11 @@ async function inicializarAplicacao() {
     configurarEventListeners();
     configurarBotaoAjudaFlutuante();
 
+    // Inicializar caixinhas
+    if (window.CaixinhaUI && window.CaixinhaUI.initCaixinhasUI) {
+        window.CaixinhaUI.initCaixinhasUI();
+    }
+
     // Mostrar seção padrão (dashboard) e configurar botão de ajuda
     mostrarSecao('dashboard');
 }

@@ -1597,6 +1597,13 @@ function mostrarSecao(secaoId) {
         renderizarOrcamentos();
     }
 
+    // Atualizar caixinhas quando mostrar a seção de caixinhas
+    if (secaoId === 'caixinhas') {
+        if (window.CaixinhaUI && window.CaixinhaUI.renderizarListaCaixinhas) {
+            window.CaixinhaUI.renderizarListaCaixinhas();
+        }
+    }
+
     // Popular seleção de meses quando mostrar a seção de relatório
     if (secaoId === 'relatorio') {
         popularSelecaoMesesRelatorio();
