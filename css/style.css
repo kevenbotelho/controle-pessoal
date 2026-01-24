@@ -1928,10 +1928,11 @@ form button {
         font-size: 24px;
     }
 
-.modal-ajuda-body {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    max-height: 50vh;
+    .modal-ajuda-body {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        max-height: 50vh;
+    }
 }
 
 /* Botão de Imprimir no Relatório */
@@ -2630,5 +2631,4 @@ form button {
     .acoes-impressao {
         display: none;
     }
-}
 }
